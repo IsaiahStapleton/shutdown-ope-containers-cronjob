@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: run-shutdown-ope-containers 
+  namespace: ope-test
+spec:
+  serviceAccountName: shutdown-ope-containers 
+  taskRef:
+    name: shutdown-ope-containers 

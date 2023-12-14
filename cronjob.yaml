@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trigger-shutdown-ope-containers
+  namespace: ope-test
+spec:
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  # schedule: "0 */48 * * *"
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: trigger-shutdown-ope-containers
+        spec:
+          serviceAccountName: shutdown-ope-containers
+          volumes:
+            - name: shutdown-ope-containers 
+              configMap:
+                name: shutdown-ope-containers 
+          containers:
+            - name: shutdown-ope-containers 
+              image: quay.io/operate-first/opf-toolbox:v0.8.0 
+              env:
+                - name: POD_NS
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+              command:
+                - "/bin/sh"
+                - "-ec"
+                - "oc create -f /shutdown-ope-containers/taskrun.yaml -n ${POD_NS}"
+              # volumeMounts: 
+              #   - mountPath: /shutdown-ope-containers
+              #     name: shutdown-ope-containers
+          restartPolicy: OnFailure
